@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 import com.squareup.moshi.Json;
 
-class Ingredient implements Parcelable {
+public class Ingredient implements Parcelable {
 
     @Json(name = "quantity")
     private float mQuantity;

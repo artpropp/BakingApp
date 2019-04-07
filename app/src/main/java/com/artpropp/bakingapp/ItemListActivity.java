@@ -1,27 +1,30 @@
 package com.artpropp.bakingapp;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
+import com.artpropp.bakingapp.databinding.ActivityItemListBinding;
+import com.artpropp.bakingapp.model.Ingredient;
 import com.artpropp.bakingapp.model.Recipe;
+import com.artpropp.bakingapp.model.Step;
+import com.artpropp.bakingapp.viewmodel.ItemListViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.artpropp.bakingapp.dummy.DummyContent;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,7 +35,7 @@ import java.util.List;
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
-public class ItemListActivity extends AppCompatActivity {
+public class ItemListActivity extends AppCompatActivity implements ItemListViewModel.OnItemClickListener {
 
     public static final String RECIPE_EXTRA = "recipe";
 
@@ -45,7 +48,6 @@ public class ItemListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_item_list);
 
         Intent intent = getIntent();
         if (intent == null || !intent.hasExtra(RECIPE_EXTRA)) {
@@ -53,20 +55,29 @@ public class ItemListActivity extends AppCompatActivity {
             return;
         }
 
+        ItemListViewModel viewModel = ViewModelProviders.of(this).get(ItemListViewModel.class);
         Recipe recipe = intent.getParcelableExtra(RECIPE_EXTRA);
+        viewModel.init(this, recipe);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        ActivityItemListBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_item_list);
+        binding.setLifecycleOwner(this);
+        binding.setViewModel(viewModel);
+
+        Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setTitle(recipe.getName());
         }
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show());
+        FloatingActionButton fab = binding.fab;
+        fab.setOnClickListener(view -> {
+            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+            // TODO: Add logic to add ingredients to Widget
+        });
 
-        if (findViewById(R.id.item_detail_container) != null) {
+        if (binding.getRoot().findViewById(R.id.item_detail_container) != null) {
             // The detail container view will be present only in the
             // large-screen layouts (res/values-w900dp).
             // If this view is present, then the
@@ -74,83 +85,31 @@ public class ItemListActivity extends AppCompatActivity {
             mTwoPane = true;
         }
 
-        View recyclerView = findViewById(R.id.item_list);
-        assert recyclerView != null;
-        setupRecyclerView((RecyclerView) recyclerView);
     }
 
-    private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, DummyContent.ITEMS, mTwoPane));
+    @Override
+    public void onIngredientsClick(String name, List<Ingredient> ingredients) {
+        if (mTwoPane) {
+            Bundle arguments = new Bundle();
+            arguments.putParcelableArrayList(IngredientsFragment.INGREDIENTS_EXTRA, (ArrayList<Ingredient>) ingredients);
+            arguments.putString(RECIPE_EXTRA, name);
+            IngredientsFragment fragment = new IngredientsFragment();
+            fragment.setArguments(arguments);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.item_detail_container, fragment)
+                    .commit();
+        } else {
+            Intent intent = new Intent(this, ItemDetailActivity.class);
+            intent.putParcelableArrayListExtra(IngredientsFragment.INGREDIENTS_EXTRA, (ArrayList<Ingredient>) ingredients);
+            intent.putExtra(RECIPE_EXTRA, name);
+            startActivity(intent);
+        }
     }
 
-    public static class SimpleItemRecyclerViewAdapter
-            extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
-
-        private final ItemListActivity mParentActivity;
-        private final List<DummyContent.DummyItem> mValues;
-        private final boolean mTwoPane;
-        private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                DummyContent.DummyItem item = (DummyContent.DummyItem) view.getTag();
-                if (mTwoPane) {
-                    Bundle arguments = new Bundle();
-                    arguments.putString(ItemDetailFragment.ARG_ITEM_ID, item.id);
-                    ItemDetailFragment fragment = new ItemDetailFragment();
-                    fragment.setArguments(arguments);
-                    mParentActivity.getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.item_detail_container, fragment)
-                            .commit();
-                } else {
-                    Context context = view.getContext();
-                    Intent intent = new Intent(context, ItemDetailActivity.class);
-                    intent.putExtra(ItemDetailFragment.ARG_ITEM_ID, item.id);
-
-                    context.startActivity(intent);
-                }
-            }
-        };
-
-        SimpleItemRecyclerViewAdapter(ItemListActivity parent,
-                                      List<DummyContent.DummyItem> items,
-                                      boolean twoPane) {
-            mValues = items;
-            mParentActivity = parent;
-            mTwoPane = twoPane;
-        }
-
-        @NonNull
-        @Override
-        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_list_content, parent, false);
-            return new ViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
-            holder.mIdView.setText(mValues.get(position).id);
-            holder.mContentView.setText(mValues.get(position).content);
-
-            holder.itemView.setTag(mValues.get(position));
-            holder.itemView.setOnClickListener(mOnClickListener);
-        }
-
-        @Override
-        public int getItemCount() {
-            return mValues.size();
-        }
-
-        class ViewHolder extends RecyclerView.ViewHolder {
-            final TextView mIdView;
-            final TextView mContentView;
-
-            ViewHolder(View view) {
-                super(view);
-                mIdView = view.findViewById(R.id.id_text);
-                mContentView = view.findViewById(R.id.content);
-            }
-        }
+    @Override
+    public void onStepClick(Step step) {
+        // TODO: show StepFragment
+        Log.d("ITEM_LIST", "show step: " + step.getDescription());
     }
 
     private void closeOnError() {

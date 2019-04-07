@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 import com.squareup.moshi.Json;
 
-class Step implements Parcelable {
+public class Step implements Parcelable {
 
     @Json(name = "id")
     private int mId;

@@ -5,11 +5,8 @@
 
     <data>
         <variable
-            name="recipe"
-            type="com.artpropp.bakingapp.model.Recipe" />
-        <variable
             name="view_model"
-            type="com.artpropp.bakingapp.viewmodel.MainViewModel" />
+            type="com.artpropp.bakingapp.viewmodel.ItemListViewModel" />
     </data>
 
     <androidx.cardview.widget.CardView
@@ -19,7 +16,7 @@
         android:layout_marginTop="@dimen/card_margin"
         android:layout_marginStart="@dimen/card_margin"
         android:layout_marginEnd="@dimen/card_margin"
-        android:onClick="@{() -> view_model.onRecipeClick(recipe.id)}"
+        android:onClick="@{() -> view_model.onIngredientsClick()}"
         style="@style/CardView.Light"
         android:foreground="?attr/selectableItemBackground"
         app:cardCornerRadius="@dimen/card_corner_radius">
@@ -33,13 +30,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 style="@style/Base.TextAppearance.AppCompat.Button"
-                android:padding="@dimen/large_card_padding"
-                android:text="@{recipe.name}"
+                android:padding="@dimen/small_card_padding"
+                android:text="@string/ingredients"
                 android:textAlignment="center"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                tools:text="Recipe Name" />
+                app:layout_constraintEnd_toEndOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
