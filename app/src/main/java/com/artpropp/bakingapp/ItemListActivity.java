@@ -19,6 +19,7 @@ import com.artpropp.bakingapp.viewmodel.ItemListViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import android.os.PersistableBundle;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -38,6 +39,7 @@ import java.util.List;
 public class ItemListActivity extends AppCompatActivity implements ItemListViewModel.OnItemClickListener {
 
     public static final String RECIPE_EXTRA = "recipe";
+    private ItemListViewModel mViewModel;
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -50,25 +52,25 @@ public class ItemListActivity extends AppCompatActivity implements ItemListViewM
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
-        if (intent == null || !intent.hasExtra(RECIPE_EXTRA)) {
+        Recipe recipe;
+        if (intent != null && intent.hasExtra(RECIPE_EXTRA)) {
+            recipe = intent.getParcelableExtra(RECIPE_EXTRA);
+        } else if (savedInstanceState != null) {
+            recipe = savedInstanceState.getParcelable(RECIPE_EXTRA);
+        } else {
             closeOnError();
             return;
         }
 
-        ItemListViewModel viewModel = ViewModelProviders.of(this).get(ItemListViewModel.class);
-        Recipe recipe = intent.getParcelableExtra(RECIPE_EXTRA);
-        viewModel.init(this, recipe);
+        mViewModel = ViewModelProviders.of(this).get(ItemListViewModel.class);
+        mViewModel.init(this, recipe);
 
         ActivityItemListBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_item_list);
         binding.setLifecycleOwner(this);
-        binding.setViewModel(viewModel);
+        binding.setViewModel(mViewModel);
 
         Toolbar toolbar = binding.toolbar;
-        setSupportActionBar(toolbar);
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setTitle(recipe.getName());
-        }
+        setupActionBar(toolbar, recipe.getName());
 
         FloatingActionButton fab = binding.fab;
         fab.setOnClickListener(view -> {
@@ -85,6 +87,15 @@ public class ItemListActivity extends AppCompatActivity implements ItemListViewM
             mTwoPane = true;
         }
 
+    }
+
+    private void setupActionBar(Toolbar toolbar, String title) {
+        setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle(title);
+        }
     }
 
     @Override
@@ -117,4 +128,9 @@ public class ItemListActivity extends AppCompatActivity implements ItemListViewM
         Toast.makeText(this, R.string.detail_error_message, Toast.LENGTH_SHORT).show();
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putParcelable(RECIPE_EXTRA, mViewModel.getRecipe());
+        super.onSaveInstanceState(outState);
+    }
 }

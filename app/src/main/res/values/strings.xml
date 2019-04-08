@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">Baking App</string>
+    <string name="title_item_list">Item List</string>
     <string name="title_item_detail">Item Detail</string>
     <string name="detail_error_message">An error occurred while trying to present recipe details</string>
     <string name="ingredients">Ingredients</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
 </resources>

@@ -8,4 +8,5 @@
     <dimen name="large_card_padding">48dp</dimen>
     <dimen name="card_margin">8dp</dimen>
     <dimen name="card_corner_radius">4dp</dimen>
+    <dimen name="card_margin_half">4dp</dimen>
 </resources>
