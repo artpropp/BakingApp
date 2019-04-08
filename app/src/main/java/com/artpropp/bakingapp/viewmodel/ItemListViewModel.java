@@ -17,7 +17,7 @@ public class ItemListViewModel extends AndroidViewModel {
 
     public interface OnItemClickListener {
         void onIngredientsClick(String name, List<Ingredient> ingredients);
-        void onStepClick(Step step);
+        void onStepClick(String name, Step step);
     }
 
     private LifecycleOwner mLifecycleOwner;
@@ -59,7 +59,7 @@ public class ItemListViewModel extends AndroidViewModel {
     public void onStepClicked(int stepId) {
         for (Step step: mRecipe.getSteps()) {
             if (step.getId() == stepId && mListener != null) {
-                mListener.onStepClick(step);
+                mListener.onStepClick(mRecipe.getName(), step);
             }
         }
     }

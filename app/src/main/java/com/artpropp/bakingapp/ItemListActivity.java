@@ -118,9 +118,22 @@ public class ItemListActivity extends AppCompatActivity implements ItemListViewM
     }
 
     @Override
-    public void onStepClick(Step step) {
-        // TODO: show StepFragment
-        Log.d("ITEM_LIST", "show step: " + step.getDescription());
+    public void onStepClick(String name, Step step) {
+        if (mTwoPane) {
+            Bundle arguments = new Bundle();
+            arguments.putParcelable(StepFragment.STEP_EXTRA, step);
+            arguments.putString(RECIPE_EXTRA, name);
+            StepFragment fragment = new StepFragment();
+            fragment.setArguments(arguments);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.item_detail_container, fragment)
+                    .commit();
+        } else {
+            Intent intent = new Intent(this, ItemDetailActivity.class);
+            intent.putExtra(StepFragment.STEP_EXTRA, step);
+            intent.putExtra(RECIPE_EXTRA, name);
+            startActivity(intent);
+        }
     }
 
     private void closeOnError() {
