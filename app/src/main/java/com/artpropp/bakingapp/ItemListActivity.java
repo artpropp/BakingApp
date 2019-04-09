@@ -2,14 +2,7 @@ package com.artpropp.bakingapp;
 
 import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.databinding.DataBindingUtil;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
+import android.widget.Toast;
 
 import com.artpropp.bakingapp.databinding.ActivityItemListBinding;
 import com.artpropp.bakingapp.model.Ingredient;
@@ -19,14 +12,14 @@ import com.artpropp.bakingapp.viewmodel.ItemListViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
-import android.os.PersistableBundle;
-import android.util.Log;
-import android.widget.Toast;
-
-import com.artpropp.bakingapp.dummy.DummyContent;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.ViewModelProviders;
 
 /**
  * An activity representing a list of Items. This activity
