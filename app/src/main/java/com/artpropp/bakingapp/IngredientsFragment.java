@@ -1,14 +1,11 @@
 package com.artpropp.bakingapp;
 
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.artpropp.bakingapp.adapter.IngredientsAdapter;
-import com.artpropp.bakingapp.dummy.DummyContent;
 import com.artpropp.bakingapp.model.Ingredient;
 
 import java.util.List;
@@ -29,7 +26,7 @@ public class IngredientsFragment extends Fragment {
     @BindView(R.id.ingredients_recycler_view)
     RecyclerView mRecyclerView;
 
-    private IngredientsAdapter mAdatper;
+    private IngredientsAdapter mAdapter;
 
     public IngredientsFragment() {
     }
@@ -40,7 +37,7 @@ public class IngredientsFragment extends Fragment {
 
         if (getArguments() != null && getArguments().containsKey(INGREDIENTS_EXTRA)) {
             List<Ingredient> ingredients = getArguments().getParcelableArrayList(INGREDIENTS_EXTRA);
-            mAdatper = new IngredientsAdapter(ingredients);
+            mAdapter = new IngredientsAdapter(ingredients);
         }
     }
 
@@ -64,6 +61,6 @@ public class IngredientsFragment extends Fragment {
         } else {
             mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         }
-        mRecyclerView.setAdapter(mAdatper);
+        mRecyclerView.setAdapter(mAdapter);
     }
 }

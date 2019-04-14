@@ -4,12 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * An activity representing a single Item detail screen. This
@@ -19,22 +18,19 @@ import androidx.appcompat.widget.Toolbar;
  */
 public class ItemDetailActivity extends AppCompatActivity {
 
+    @BindView(R.id.detail_toolbar)
+    Toolbar mToolbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_detail);
+        ButterKnife.bind(this);
 
         Intent intent = getIntent();
         if (intent == null) return;
 
-
-        Toolbar toolbar = findViewById(R.id.detail_toolbar);
-        setSupportActionBar(toolbar);
-
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own detail action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show());
+        setSupportActionBar(mToolbar);
 
         // Show the Up button in the action bar.
         setupActionBar(intent);
@@ -54,7 +50,6 @@ public class ItemDetailActivity extends AppCompatActivity {
                         .commit();
             }
         }
-
     }
 
     private void setupActionBar(Intent intent) {

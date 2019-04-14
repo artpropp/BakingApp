@@ -2,7 +2,6 @@ package com.artpropp.bakingapp;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,8 +13,8 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.ui.PlayerView;
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
@@ -64,21 +63,47 @@ public class StepFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        if (Util.SDK_INT > 23) {
+            initializePlayer();
+            if (mPlayerView != null) {
+                mPlayerView.onResume();
+            }
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
-        initializePlayer();
-        if (mPlayerView != null && mStep.getVideoURL() != null) {
-            mPlayerView.onResume();
+        if (Util.SDK_INT <= 23 || mPlayer == null) {
+            initializePlayer();
+            if (mPlayerView != null) {
+                mPlayerView.onResume();
+            }
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (mPlayerView != null) {
-            mPlayerView.onPause();
+        if (Util.SDK_INT <= 23) {
+            if (mPlayerView != null) {
+                mPlayerView.onPause();
+            }
+            releasePlayer();
         }
-        releasePlayer();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (Util.SDK_INT > 23) {
+            if (mPlayerView != null) {
+                mPlayerView.onPause();
+            }
+            releasePlayer();
+        }
     }
 
     private void initializePlayer() {
@@ -88,8 +113,7 @@ public class StepFragment extends Fragment {
         mPlayerView.setPlayer(mPlayer);
 
         Uri uri = Uri.parse(mStep.getVideoURL());
-        Log.w("BACKINGAPP", "uri: " + uri.toString());
-        DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(getContext(), new DefaultHttpDataSourceFactory("BakingApp"));
+        DefaultHttpDataSourceFactory dataSourceFactory =  new DefaultHttpDataSourceFactory("BakingApp");
         MediaSource mediaSource = new ExtractorMediaSource.Factory(dataSourceFactory)
                 .createMediaSource(uri);
         mPlayer.prepare(mediaSource);
