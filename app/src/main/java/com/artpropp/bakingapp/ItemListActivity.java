@@ -1,5 +1,7 @@
 package com.artpropp.bakingapp;
 
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
@@ -8,6 +10,7 @@ import com.artpropp.bakingapp.databinding.ActivityItemListBinding;
 import com.artpropp.bakingapp.model.Ingredient;
 import com.artpropp.bakingapp.model.Recipe;
 import com.artpropp.bakingapp.model.Step;
+import com.artpropp.bakingapp.util.DataManager;
 import com.artpropp.bakingapp.viewmodel.ItemListViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -67,9 +70,10 @@ public class ItemListActivity extends AppCompatActivity implements ItemListViewM
 
         FloatingActionButton fab = binding.fab;
         fab.setOnClickListener(view -> {
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+            Snackbar.make(view, getString(R.string.action_widget_ingredients_selected), Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
-            // TODO: Add logic to add ingredients to Widget
+            DataManager.setWidgetRecipeId(this, recipe.getId());
+            updateAppWidget();
         });
 
         if (binding.getRoot().findViewById(R.id.item_detail_container) != null) {
@@ -80,6 +84,15 @@ public class ItemListActivity extends AppCompatActivity implements ItemListViewM
             mTwoPane = true;
         }
 
+    }
+
+    private void updateAppWidget() {
+        Intent intent = new Intent(this, IngredientsWidget.class);
+        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        int[] ids = AppWidgetManager.getInstance(getApplication())
+                .getAppWidgetIds(new ComponentName(getApplication(), IngredientsWidget.class));
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+        sendBroadcast(intent);
     }
 
     private void setupActionBar(Toolbar toolbar, String title) {

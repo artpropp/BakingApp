@@ -6,4 +6,7 @@
     <string name="ingredients">Ingredients</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
+    <string name="action_widget_ingredients_selected">The ingredients of this recipe have been selected for the home screen widget</string>
 </resources>
