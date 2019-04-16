@@ -54,6 +54,7 @@ public class IngredientsRemoteViewsFactory implements RemoteViewsService.RemoteV
 
         Recipe recipe = DataManager.getWidgetRecipe(mContext);
         Intent fillInIntent = new Intent();
+        fillInIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         fillInIntent.putExtra(ItemListActivity.RECIPE_EXTRA, recipe);
         views.setOnClickFillInIntent(R.id.widget_ingredient_linear_layout, fillInIntent);
 
