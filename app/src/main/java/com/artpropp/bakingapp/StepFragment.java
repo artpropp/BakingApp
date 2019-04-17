@@ -17,6 +17,7 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import butterknife.BindView;
@@ -25,6 +26,12 @@ import butterknife.ButterKnife;
 public class StepFragment extends Fragment {
 
     static final String STEP_EXTRA = "STEP";
+
+    private static final String AUTOPLAY = "autoplay";
+    private static final String CURRECNT_POSITION = "current_position";
+
+    private boolean mAutoPlay = true;
+    private long mCurrentPosition;
 
     @BindView(R.id.player_view)
     PlayerView mPlayerView;
@@ -35,8 +42,7 @@ public class StepFragment extends Fragment {
     private Step mStep;
     private SimpleExoPlayer mPlayer;
 
-    public StepFragment() {
-    }
+    public StepFragment() { /* default constructor */ }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -44,6 +50,16 @@ public class StepFragment extends Fragment {
 
         if (getArguments() != null && getArguments().containsKey(STEP_EXTRA)) {
             mStep = getArguments().getParcelable(STEP_EXTRA);
+        }
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            mAutoPlay = savedInstanceState.getBoolean(AUTOPLAY, false);
+            mCurrentPosition = savedInstanceState.getLong(CURRECNT_POSITION, 0);
         }
     }
 
@@ -63,13 +79,19 @@ public class StepFragment extends Fragment {
     }
 
     @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putBoolean(AUTOPLAY, mAutoPlay);
+        outState.putLong(CURRECNT_POSITION, mCurrentPosition);
+    }
+
+
+    @Override
     public void onStart() {
         super.onStart();
         if (Util.SDK_INT > 23) {
             initializePlayer();
-            if (mPlayerView != null) {
-                mPlayerView.onResume();
-            }
         }
     }
 
@@ -78,9 +100,6 @@ public class StepFragment extends Fragment {
         super.onResume();
         if (Util.SDK_INT <= 23 || mPlayer == null) {
             initializePlayer();
-            if (mPlayerView != null) {
-                mPlayerView.onResume();
-            }
         }
     }
 
@@ -88,9 +107,6 @@ public class StepFragment extends Fragment {
     public void onPause() {
         super.onPause();
         if (Util.SDK_INT <= 23) {
-            if (mPlayerView != null) {
-                mPlayerView.onPause();
-            }
             releasePlayer();
         }
     }
@@ -99,9 +115,6 @@ public class StepFragment extends Fragment {
     public void onStop() {
         super.onStop();
         if (Util.SDK_INT > 23) {
-            if (mPlayerView != null) {
-                mPlayerView.onPause();
-            }
             releasePlayer();
         }
     }
@@ -109,20 +122,35 @@ public class StepFragment extends Fragment {
     private void initializePlayer() {
         if (mPlayer != null || getContext() == null) return;
         mPlayer = ExoPlayerFactory.newSimpleInstance(getContext());
-        mPlayer.setPlayWhenReady(true);
+        mPlayer.setPlayWhenReady(mAutoPlay);
+
         mPlayerView.setPlayer(mPlayer);
 
         Uri uri = Uri.parse(mStep.getVideoURL());
-        DefaultHttpDataSourceFactory dataSourceFactory =  new DefaultHttpDataSourceFactory("BakingApp");
-        MediaSource mediaSource = new ExtractorMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(uri);
+        MediaSource mediaSource = getMediaSource(uri);
         mPlayer.prepare(mediaSource);
+
+        mPlayer.seekTo(mCurrentPosition);
+    }
+
+    private MediaSource getMediaSource(Uri uri) {
+        DefaultHttpDataSourceFactory dataSourceFactory =  new DefaultHttpDataSourceFactory("BakingApp");
+        return new ExtractorMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(uri);
     }
 
     private void releasePlayer() {
         if (mPlayer == null) return;
+
+        savePlayerState();
+
         mPlayer.release();
         mPlayer = null;
+    }
+
+    private void savePlayerState() {
+        mAutoPlay = mPlayer.getPlayWhenReady();
+        mCurrentPosition = mPlayer.getContentPosition();
     }
 
 }
