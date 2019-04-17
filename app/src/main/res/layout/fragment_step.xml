@@ -67,6 +67,30 @@
 
         </androidx.cardview.widget.CardView>
 
+        <androidx.cardview.widget.CardView
+            android:id="@+id/image_card_view"
+            style="@style/CardView.Light"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/card_margin"
+            android:layout_marginTop="@dimen/card_margin"
+            android:layout_marginEnd="@dimen/card_margin"
+            android:foreground="?attr/selectableItemBackground"
+            app:cardCornerRadius="@dimen/card_corner_radius">
+
+            <ImageView
+                android:id="@+id/image_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop"
+                android:padding="@dimen/small_card_padding"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:contentDescription="@string/step_image"
+                app:imageUrl="@{step.thumbnailURL}" />
+
+        </androidx.cardview.widget.CardView>
+
     </LinearLayout>
 
 </layout>
