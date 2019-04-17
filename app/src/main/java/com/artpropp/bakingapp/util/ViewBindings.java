@@ -3,6 +3,7 @@ package com.artpropp.bakingapp.util;
 import android.view.View;
 import android.view.ViewParent;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -13,25 +14,34 @@ public class ViewBindings {
 
     @BindingAdapter("imageUrl")
     public static void bindRecyclerViewAdapter(ImageView imageView, String imageUrl) {
-        if (imageUrl != null && !imageUrl.isEmpty()) {
-
-            Picasso.get()
-                    .load(imageUrl.trim())
-                    .into(imageView, new Callback() {
-
-                        @Override
-                        public void onSuccess() {
-                            // nothing else to do here
-                        }
-
-                        @Override
-                        public void onError(Exception e) {
-                            hideImageView(imageView);
-                        }
-                    });
-        } else {
+        if (imageUrl == null || imageUrl.isEmpty()) {
             hideImageView(imageView);
+            return;
         }
+
+        Picasso.get()
+                .load(imageUrl.trim())
+                .into(imageView, new Callback() {
+
+                    @Override
+                    public void onSuccess() {
+                        // nothing else to do here
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        hideImageView(imageView);
+                    }
+                });
+    }
+
+    @BindingAdapter("whenLoading")
+    public static void bindWhenLoading(View view, Boolean isLoading) {
+        if (isLoading) {
+            view.setVisibility(View.VISIBLE);
+            return;
+        }
+        view.setVisibility(View.GONE);
     }
 
     private static void hideImageView(ImageView imageView) {

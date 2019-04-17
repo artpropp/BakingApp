@@ -4,11 +4,14 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.artpropp.bakingapp.api.RecipeApi;
 import com.artpropp.bakingapp.model.Recipe;
 
-import java.util.List;
+import io.reactivex.Observable;
 
 public class DataManager {
+
+    private DataManager() { /* hide constructor for this static helper class */ }
 
     private static final String SELECTED_RECIPE_ID = "selected-recipe-index";
 
@@ -19,22 +22,19 @@ public class DataManager {
                 .apply();
     }
 
-    public static Recipe getWidgetRecipe(Context context) {
-        List<Recipe> recipes = RecipeReaderUtil.getRecipes(context);
-        if (recipes == null || recipes.isEmpty()) return null;
-
-        int defaultId = recipes.get(0).getId();
-
+    public static Observable<Recipe> getWidgetRecipe(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        int selectedRecipeId = sharedPreferences.getInt(SELECTED_RECIPE_ID, defaultId);
+        int selectedRecipeId = sharedPreferences.getInt(SELECTED_RECIPE_ID, 0);
 
-        for (Recipe recipe : recipes) {
-            if (recipe.getId() == selectedRecipeId) {
-                return recipe;
-            }
-        }
-
-        return recipes.get(0);
+        return RecipeApi.getRecipes()
+                .map( recipes -> {
+                    for (Recipe recipe: recipes) {
+                        if (recipe.getId() == selectedRecipeId) {
+                            return recipe;
+                        }
+                    }
+                    return recipes.get(0);
+                } );
     }
 
 }

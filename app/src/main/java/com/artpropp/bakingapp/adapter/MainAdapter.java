@@ -36,7 +36,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.RecipeViewHold
 
     @Override
     public int getItemCount() {
-        return mViewModel.getRecipes().size();
+        return mViewModel.getRecipes() != null ? mViewModel.getRecipes().size() : 0;
     }
 
     class RecipeViewHolder extends RecyclerView.ViewHolder {

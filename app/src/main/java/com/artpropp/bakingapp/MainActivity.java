@@ -6,33 +6,39 @@ import android.os.Bundle;
 
 import com.artpropp.bakingapp.databinding.ActivityMainBinding;
 import com.artpropp.bakingapp.model.Recipe;
-import com.artpropp.bakingapp.util.RecipeReaderUtil;
+import com.artpropp.bakingapp.util.SimpleIdlingResource;
 import com.artpropp.bakingapp.viewmodel.MainViewModel;
 
-import java.util.List;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.test.espresso.IdlingResource;
 
 public class MainActivity extends AppCompatActivity implements MainViewModel.OnRecipeClickListener {
 
+    MainViewModel mViewModel;
     RecyclerView mRecyclerView;
+
+    SimpleIdlingResource mIdlingResource;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
-        List<Recipe> recipes = RecipeReaderUtil.getRecipes(this);
-        viewModel.init(this, recipes);
+        getIdlingResource();
+        if (mViewModel == null) {
+            mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+            mViewModel.init(this, mIdlingResource);
+        }
 
         ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         binding.setLifecycleOwner(this);
-        binding.setViewModel(viewModel);
+        binding.setViewModel(mViewModel);
 
         mRecyclerView = binding.mainRecyclerView;
         setupRecyclerView();
@@ -57,5 +63,17 @@ public class MainActivity extends AppCompatActivity implements MainViewModel.OnR
         Intent intent = new Intent(this, ItemListActivity.class);
         intent.putExtra(ItemListActivity.RECIPE_EXTRA, recipe);
         startActivity(intent);
+    }
+
+    /**
+     * Only called from test, creates and returns a new {@link SimpleIdlingResource}.
+     */
+    @VisibleForTesting
+    @NonNull
+    public IdlingResource getIdlingResource() {
+        if (mIdlingResource == null) {
+            mIdlingResource = new SimpleIdlingResource();
+        }
+        return mIdlingResource;
     }
 }

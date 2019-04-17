@@ -3,10 +3,14 @@ package com.artpropp.bakingapp;
 import android.app.Activity;
 import android.app.Instrumentation;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import androidx.test.espresso.Espresso;
+import androidx.test.espresso.IdlingRegistry;
+import androidx.test.espresso.IdlingResource;
 import androidx.test.espresso.contrib.RecyclerViewActions;
 import androidx.test.espresso.intent.rule.IntentsTestRule;
 
@@ -21,6 +25,8 @@ import static org.hamcrest.core.IsNot.not;
 
 public class RecipeExtraIntentTest {
 
+    private IdlingResource mIdlingResource;
+
     @Rule
     public IntentsTestRule<MainActivity> mActivityRule = new IntentsTestRule<>(MainActivity.class);
 
@@ -31,12 +37,25 @@ public class RecipeExtraIntentTest {
         intending(not(isInternal())).respondWith(new Instrumentation.ActivityResult(Activity.RESULT_OK, null));
     }
 
+    @Before
+    public void registerIdlingResource() {
+        mIdlingResource = mActivityRule.getActivity().getIdlingResource();
+        IdlingRegistry.getInstance().register(mIdlingResource);
+    }
+
     @Test
     public void clickMainRecyclerViewItem() {
         onView(withId(R.id.main_recycler_view))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
 
         intended(hasExtraWithKey(ItemListActivity.RECIPE_EXTRA));
+    }
+
+    @After
+    public void unregisterIdlingResource() {
+        if (mIdlingResource != null) {
+            IdlingRegistry.getInstance().unregister(mIdlingResource);
+        }
     }
 
 }

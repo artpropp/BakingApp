@@ -1,15 +1,18 @@
 package com.artpropp.bakingapp;
 
 import com.artpropp.bakingapp.model.Recipe;
-import com.artpropp.bakingapp.util.RecipeReaderUtil;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.List;
 
+import androidx.test.espresso.IdlingRegistry;
+import androidx.test.espresso.IdlingResource;
 import androidx.test.espresso.contrib.RecyclerViewActions;
-import androidx.test.rule.ActivityTestRule;
+import androidx.test.espresso.intent.rule.IntentsTestRule;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
@@ -22,8 +25,16 @@ import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
 public class MainActivityTest {
 
+    private IdlingResource mIdlingResource;
+
     @Rule
-    public ActivityTestRule<MainActivity> mActivityRule = new ActivityTestRule<>(MainActivity.class);
+    public IntentsTestRule<MainActivity> mActivityRule = new IntentsTestRule<>(MainActivity.class);
+
+    @Before
+    public void registerIdlingResource() {
+        mIdlingResource = mActivityRule.getActivity().getIdlingResource();
+        IdlingRegistry.getInstance().register(mIdlingResource);
+    }
 
     @Test
     public void onCreate() {
@@ -32,8 +43,10 @@ public class MainActivityTest {
 
     @Test
     public void onDisplayRecipes() {
-        List<Recipe> recipes = RecipeReaderUtil.getRecipes(mActivityRule.getActivity());
-        onView(withText(recipes.get(0).getName())).check(matches(isDisplayed()));
+        onView(withId(R.id.main_recycler_view)).check(matches(isCompletelyDisplayed()));
+        List<Recipe> recipes = mActivityRule.getActivity().mViewModel.getRecipes();
+        String recipeName = recipes.get(0).getName();
+        onView(withText(recipeName)).check(matches(isDisplayed()));
     }
 
     @Test
@@ -47,15 +60,24 @@ public class MainActivityTest {
 
     @Test
     public void onRecyclerViewThirdItemClick() {
+        onView(withId(R.id.main_recycler_view)).check(matches(isCompletelyDisplayed()));
         final int index = 3;
-        List<Recipe> recipes = RecipeReaderUtil.getRecipes(mActivityRule.getActivity());
+        List<Recipe> recipes = mActivityRule.getActivity().mViewModel.getRecipes();
         onView(withId(R.id.main_recycler_view))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(index, click()));
 
         onView(withId(R.id.toolbar)).check(matches(isDisplayed()));
         onView(withId(R.id.item_list)).check(matches(isDisplayed()));
         onView(withText("Ingredients")).check(matches(isDisplayed()));
-        onView(withText(recipes.get(index).getName())).check(matches(withParent(withId(R.id.toolbar))));
+        onView(withText(recipes.get(index).getName()))
+                .check(matches(withParent(withId(R.id.toolbar))));
+    }
+
+    @After
+    public void unregisterIdlingResource() {
+        if (mIdlingResource != null) {
+            IdlingRegistry.getInstance().unregister(mIdlingResource);
+        }
     }
 
 }
